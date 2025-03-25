@@ -1,68 +1,108 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
-  }
-  h1, h2, h3 {
-    color: #d50000;
-    text-align: center;
-  }
-  input, button {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-  }
-  .item-box {
-    background: white;
-    border-radius: 8px;
-    margin: 10px auto;
-    padding: 10px;
-    max-width: 90%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-</style>
-
   <title>Parts</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+    .navbar {
+      background-color: black;
+      padding: 10px;
+      text-align: center;
+    }
+    .navbar a {
+      color: white;
+      margin: 0 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .sub-banner {
+      background-color: #ddd;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+    #searchBar {
+      width: 90%;
+      padding: 10px;
+      margin: 10px auto;
+      display: block;
+      font-size: 16px;
+    }
+    .item-box {
+      background: white;
+      border-radius: 8px;
+      margin: 10px auto;
+      padding: 10px;
+      max-width: 90%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .item-box img {
+      max-width: 100px;
+      height: auto;
+      display: block;
+      margin: 5px auto;
+    }
+  </style>
 </head>
-<body style="font-family: Arial;">
-  <div id="subBanner" style="text-align:center; font-weight:bold; margin:10px;"></div>
-  <input type="text" id="searchBar" placeholder="Search..." style="width: 90%; margin:10px;">
-  <div id="parts-container" style="padding: 10px;"></div>
+<body>
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="parts.html">Parts</a>
+  <a href="accessories.html">Accessories</a>
+</div>
 
-  <script>
-    const regData = JSON.parse(localStorage.getItem("regData") || "null");
-    const parts = JSON.parse(localStorage.getItem("parts") || "[]");
-    const container = document.getElementById("parts-container");
+<div id="subBanner" class="sub-banner"></div>
+<input type="text" id="searchBar" placeholder="Search by name, number, make or model...">
+<div id="parts-container"></div>
 
-    document.getElementById("subBanner").innerText = regData ? 
-      `Showing parts for ${regData.make} ${regData.model} (${regData.year})` : 
-      "Showing all parts";
 
-    parts.forEach(item => {
+<script>
+const regData = JSON.parse(localStorage.getItem("regData") || "null");
+const parts = JSON.parse(localStorage.getItem("parts") || "[]");
+const container = document.getElementById("parts-container");
+const banner = document.getElementById("subBanner");
+
+if (regData) {
+  banner.innerText = "Showing parts for " + regData.make + " " + regData.model + " (" + regData.year + ")";
+} else {
+  banner.innerText = "Showing all parts";
+}
+
+function displayParts(filter = "") {
+  container.innerHTML = "";
+  parts.forEach(part => {
+    const matchReg = !regData || (
+      part.make.toLowerCase() === regData.make.toLowerCase() &&
+      part.model.toLowerCase() === regData.model.toLowerCase() &&
+      part.year === regData.year
+    );
+    const matchSearch = !filter || Object.values(part).some(v => 
+      String(v).toLowerCase().includes(filter.toLowerCase())
+    );
+    if (matchReg && matchSearch) {
       const div = document.createElement("div");
       div.className = "item-box";
-      div.setAttribute("data-make", item.make);
-      div.setAttribute("data-model", item.model);
-      div.setAttribute("data-year", item.year);
-      div.innerHTML = `
-        <strong>${item.name}</strong><br>
-        Part No: ${item.number}<br>
-        €${item.price}<br>
-        Stock: ${item.stock}<hr>
-      `;
-      if (!regData || (
-          item.make.toLowerCase() === regData.make.toLowerCase() &&
-          item.model.toLowerCase() === regData.model.toLowerCase() &&
-          item.year === regData.year
-        )) {
-        container.appendChild(div);
+      if (part.image) {
+        div.innerHTML += '<img src="' + part.image + '" alt="Part Image">';
       }
-    });
-  </script>
+      div.innerHTML += "<strong>" + part.name + "</strong><br>Part No: " + part.number + "<br>€" + part.price + "<br>Stock: " + part.stock;
+      container.appendChild(div);
+    }
+  });
+}
+
+document.getElementById("searchBar").addEventListener("input", e => {
+  displayParts(e.target.value);
+});
+
+displayParts();
+</script>
+
 </body>
 </html>
