@@ -1,65 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
-  }
-  h1, h2, h3 {
-    color: #d50000;
-    text-align: center;
-  }
-  input, button {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-  }
-  .item-box {
-    background: white;
-    border-radius: 8px;
-    margin: 10px auto;
-    padding: 10px;
-    max-width: 90%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-</style>
-
-  <title>Home - Toyota Liffey Valley</title>
-</head>
-<body style="font-family: Arial; text-align:center;">
-  <h1>Welcome to Toyota Liffey Valley</h1>
-  <input type="text" id="regInput" placeholder="Enter reg..." />
-  <button onclick="handleReg()">Continue</button>
-
-  <script>
-    function handleReg() {
-      const reg = document.getElementById("regInput").value.trim().toLowerCase();
-      let data = null;
-      if (reg === "151d12345") {
-        data = { make: "Toyota", model: "Yaris", year: "2015" };
-      } else if (reg === "152d12345") {
-        location.href = "admin.html";
-        return;
-      } else if (reg === "191d54321") {
-        data = { make: "Toyota", model: "Corolla", year: "2019" };
-      }
-
-      if (data) {
-        localStorage.setItem("regData", JSON.stringify(data));
-        location.href = "parts.html";
-      } else {
-        alert("Reg not recognized.");
-      }
+  <title>Home</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      text-align: center;
     }
-  </script>
+    .navbar {
+      background-color: black;
+      padding: 10px;
+    }
+    .navbar a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .banner img {
+      width: 100%;
+      height: auto;
+      max-height: 300px;
+      object-fit: cover;
+    }
+    .logo img {
+      max-width: 100px;
+      margin: 10px auto;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="index.html">Home</a>
+    <a href="parts.html">Parts</a>
+    <a href="accessories.html">Accessories</a>
+  </div>
+  <div class="logo"><img id="logoImg" src="" alt="Logo" /></div>
+  <div class="banner"><img id="bannerImg" src="" alt="Banner" /></div>
+  <h2>Welcome to Toyota Liffey Valley Parts Store</h2>
+  <input type="text" id="regInput" placeholder="Enter Registration">
+  <br>
+  <button onclick="submitReg()">Continue</button>
+  <button onclick="resetReg()">Reset</button>
 
 <script>
-localStorage.setItem("parts", `[{"name": "Yaris Brake Pads", "number": "BP-YARIS-15", "make": "Toyota", "model": "Yaris", "year": "2015", "price": 45, "stock": 7, "image": ""}, {"name": "Corolla Air Filter", "number": "AF-COROLLA-19", "make": "Toyota", "model": "Corolla", "year": "2019", "price": 25, "stock": 5, "image": ""}]`);
-localStorage.setItem("accessories", `[{"name": "Yaris Roof Rack", "number": "RR-YARIS-15", "make": "Toyota", "model": "Yaris", "year": "2015", "price": 120, "stock": 2, "image": ""}, {"name": "Corolla Towbar", "number": "TB-COROLLA-19", "make": "Toyota", "model": "Corolla", "year": "2019", "price": 180, "stock": 3, "image": ""}]`);
-</script>
+const regData = {{
+  "151D12345": {{ make: "Toyota", model: "Yaris", year: "2015" }},
+  "161D67890": {{ make: "Toyota", model: "Corolla", year: "2019" }},
+  "152D12345": "admin"
+}};
 
+function submitReg() {{
+  const reg = document.getElementById("regInput").value.trim().toUpperCase();
+  if (reg === "152D12345") {{
+    window.location.href = "admin.html";
+    return;
+  }}
+  const data = regData[reg];
+  if (!data) {{
+    alert("Registration not recognized.");
+    return;
+  }}
+  localStorage.setItem("regData", JSON.stringify(data));
+  window.location.href = "parts.html";
+}}
+
+function resetReg() {{
+  localStorage.removeItem("regData");
+  alert("Registration reset.");
+}}
+
+function loadImages() {{
+  const banner = localStorage.getItem("banner");
+  const logo = localStorage.getItem("logo");
+  if (banner) document.getElementById("bannerImg").src = banner;
+  if (logo) document.getElementById("logoImg").src = logo;
+}}
+
+loadImages();
+</script>
 </body>
 </html>

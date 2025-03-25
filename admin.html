@@ -3,7 +3,24 @@
 <head>
   <title>Admin Panel</title>
   <style>
-    .admin-section {
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar {
+      background-color: black;
+      padding: 10px;
+      text-align: center;
+    }
+    .navbar a {
+      color: white;
+      margin: 0 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .admin-box {
       background: white;
       padding: 15px;
       margin: 15px auto;
@@ -13,56 +30,87 @@
     }
     input, button {
       padding: 8px;
-      margin: 5px;
+      margin: 5px 0;
+      width: 100%;
       font-size: 14px;
-      width: 90%;
-    }
-    .item-box {
-      background: #f7f7f7;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 5px;
-      text-align: left;
     }
     label {
       font-weight: bold;
       display: block;
       margin-top: 10px;
     }
+    img {
+      max-width: 100px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-<div style="background-color: black; padding: 10px; text-align: center;">
-  <a href="index.html" style="color: white; margin: 0 20px; text-decoration: none; font-size: 18px;">Home</a>
-  <a href="parts.html" style="color: white; margin: 0 20px; text-decoration: none; font-size: 18px;">Parts</a>
-  <a href="accessories.html" style="color: white; margin: 0 20px; text-decoration: none; font-size: 18px;">Accessories</a>
+<div class="navbar">
+  <a href="index.html">Home</a>
+  <a href="parts.html">Parts</a>
+  <a href="accessories.html">Accessories</a>
 </div>
 
-<h1>Admin Panel</h1>
+<h2 style="text-align:center;">Admin Panel</h2>
 
-<div class="admin-section">
-  <h3>Add New Part</h3>
+<div class="admin-box">
+  <label>Upload Logo</label>
+  <input type="file" id="logoInput">
+  <button onclick="saveImage('logo', 'logoInput')">Save Logo</button>
+  <img id="logoPreview" />
+
+  <label>Upload Banner</label>
+  <input type="file" id="bannerInput">
+  <button onclick="saveImage('banner', 'bannerInput')">Save Banner</button>
+  <img id="bannerPreview" />
+</div>
+
+<div class="admin-box">
+  <label>Add Part or Accessory</label>
   <input id="type" placeholder="Type: parts or accessories" />
-  <input id="name" placeholder="Part Name" />
+  <input id="name" placeholder="Name" />
   <input id="number" placeholder="Part Number" />
   <input id="make" placeholder="Make" />
   <input id="model" placeholder="Model" />
   <input id="year" placeholder="Year" />
   <input id="price" placeholder="Price" />
   <input id="stock" placeholder="Stock" />
-  <input type="file" id="imageFile" accept="image/*" />
+  <input type="file" id="imageFile" />
   <button onclick="saveItem()">Save Item</button>
 </div>
 
-<div class="admin-section">
-  <h3>Manage Existing Inventory</h3>
-  <div id="inventory-list"></div>
+<div class="admin-box">
+  <label>Current Inventory</label>
+  <div id="inventoryList"></div>
 </div>
 
 <script>
+function getStorage(key) {
+  return JSON.parse(localStorage.getItem(key) || "[]");
+}
+function setStorage(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+function saveImage(key, inputId) {
+  const fileInput = document.getElementById(inputId);
+  const reader = new FileReader();
+  reader.onload = function () {
+    localStorage.setItem(key, reader.result);
+    alert(key + " saved.");
+    showImages();
+  };
+  if (fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
+}
+function showImages() {
+  const logo = localStorage.getItem("logo");
+  const banner = localStorage.getItem("banner");
+  if (logo) document.getElementById("logoPreview").src = logo;
+  if (banner) document.getElementById("bannerPreview").src = banner;
+}
 function saveItem() {
   const reader = new FileReader();
-  const fileInput = document.getElementById("imageFile");
+  const file = document.getElementById("imageFile").files[0];
   reader.onload = function () {
     const item = {
       name: name.value,
@@ -74,46 +122,35 @@ function saveItem() {
       stock: stock.value,
       image: reader.result
     };
-    const key = type.value.toLowerCase() === "accessories" ? "accessories" : "parts";
-    const data = getStorage(key);
-    data.push(item);
-    setStorage(key, data);
-    alert("Item saved to " + key);
+    const key = type.value === "accessories" ? "accessories" : "parts";
+    const items = getStorage(key);
+    items.push(item);
+    setStorage(key, items);
+    alert("Item added.");
     displayItems();
   };
-  if (fileInput.files[0]) {
-    reader.readAsDataURL(fileInput.files[0]);
-  } else {
-    alert("Please select an image file.");
-  }
+  if (file) reader.readAsDataURL(file);
 }
-
-
 function deleteItem(key, index) {
-  const data = getStorage(key);
-  data.splice(index, 1);
-  setStorage(key, data);
+  const items = getStorage(key);
+  items.splice(index, 1);
+  setStorage(key, items);
   displayItems();
 }
 function displayItems() {
   const parts = getStorage("parts");
   const accessories = getStorage("accessories");
-  const list = document.getElementById("inventory-list");
-  list.innerHTML = "";
-  [["Parts", parts], ["Accessories", accessories]].forEach(([title, data]) => {
-    list.innerHTML += `<h4>${title}</h4>`;
-    data.forEach((item, index) => {
-      list.innerHTML += `
-        <div class="item-box">
-          <strong>${item.name}</strong> (${item.make} ${item.model} ${item.year})<br>
-          Part No: ${item.number}, €${item.price}, Stock: ${item.stock}<br>
-          <button onclick="deleteItem('${title.toLowerCase()}', ${index})">Delete</button>
-        </div>
-      `;
-    });
-  });
+  let html = "";
+  html += "<h4>Parts</h4>";
+  parts.forEach((p, i) => html += `<div>${p.name} <button onclick="deleteItem('parts', ${i})">Delete</button></div>`);
+  html += "<h4>Accessories</h4>";
+  accessories.forEach((p, i) => html += `<div>${p.name} <button onclick="deleteItem('accessories', ${i})">Delete</button></div>`);
+  document.getElementById("inventoryList").innerHTML = html;
 }
-document.addEventListener("DOMContentLoaded", displayItems);
+document.addEventListener("DOMContentLoaded", () => {{
+  showImages();
+  displayItems();
+}});
 </script>
 </body>
 </html>

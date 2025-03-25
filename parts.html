@@ -1,107 +1,258 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>Parts</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f0f0;
-    }
-    .navbar {
-      background-color: black;
-      padding: 10px;
-      text-align: center;
-    }
-    .navbar a {
-      color: white;
-      margin: 0 20px;
-      text-decoration: none;
-      font-size: 18px;
-    }
-    .sub-banner {
-      background-color: #ddd;
-      padding: 10px;
-      text-align: center;
-      font-weight: bold;
-    }
-    #searchBar {
-      width: 90%;
-      padding: 10px;
-      margin: 10px auto;
-      display: block;
-      font-size: 16px;
-    }
-    .item-box {
-      background: white;
-      border-radius: 8px;
-      margin: 10px auto;
-      padding: 10px;
-      max-width: 90%;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .item-box img {
-      max-width: 100px;
-      height: auto;
-      display: block;
-      margin: 5px auto;
-    }
+    body { font-family: Arial; background: #f0f0f0; padding: 10px; }
+    .category { background: #ddd; padding: 10px; margin-top: 20px; font-size: 20px; font-weight: bold; }
+    .subcategory { margin-left: 20px; margin-top: 10px; font-size: 16px; font-weight: bold; }
+    .item { background: #fff; padding: 10px; margin: 10px 0; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; }
+    .item img { width: 80px; height: 80px; object-fit: contain; border: 1px solid #ccc; border-radius: 4px; }
+    .item-info { flex-grow: 1; }
+    #searchBox { padding: 10px; width: 100%; max-width: 400px; margin: 20px auto; display: block; border-radius: 6px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
-<div class="navbar">
-  <a href="index.html">Home</a>
-  <a href="parts.html">Parts</a>
-  <a href="accessories.html">Accessories</a>
-</div>
-
+  <nav style="background:black;padding:10px;text-align:center;">
+    <a href="index.html" style="color:white;margin:0 20px;font-size:18px;text-decoration:none;">Home</a>
+    <a href="parts.html" style="color:white;margin:0 20px;font-size:18px;text-decoration:none;">Parts</a>
+    <a href="accessories.html" style="color:white;margin:0 20px;font-size:18px;text-decoration:none;">Accessories</a>
+  </nav>
 <div id="subBanner" class="sub-banner"></div>
-<input type="text" id="searchBar" placeholder="Search by name, number, make or model...">
-<div id="parts-container"></div>
+  <h1 style="text-align:center;">Available Parts</h1>
+  <input type="text" id="searchBox" placeholder="Search by name, number, make or model...">
+  <div id="partsDisplay"></div>
+  
+<script>
+  function groupBy(array, key) {
+    return array.reduce((result, obj) => {
+      const value = obj[key] || "Uncategorized";
+      result[value] = result[value] || [];
+      result[value].push(obj);
+      return result;
+    }, {});
+  }
 
+  const container = document.getElementById("partsDisplay");
+  const searchBox = document.getElementById("searchBox");
+
+  function renderParts(filter = "") {
+    container.innerHTML = "";
+    const parts = JSON.parse(localStorage.getItem("parts") || "[]");
+    const results = parts.filter(p =>
+      (p.name || "").toLowerCase().includes(filter) ||
+      (p.partNumber || "").toLowerCase().includes(filter) ||
+      (p.make || "").toLowerCase().includes(filter) ||
+      (p.model || "").toLowerCase().includes(filter)
+    );
+    if (results.length === 0) {
+      container.innerHTML = "<p>No matching parts found.</p>";
+      return;
+    }
+    const byCategory = groupBy(results, "category");
+    for (const cat in byCategory) {
+      const catEl = document.createElement("div");
+      catEl.className = "category";
+      catEl.textContent = cat;
+      container.appendChild(catEl);
+
+      const bySub = groupBy(byCategory[cat], "subcategory");
+      for (const sub in bySub) {
+        const subEl = document.createElement("div");
+        subEl.className = "subcategory";
+        subEl.textContent = sub;
+        container.appendChild(subEl);
+
+        bySub[sub].forEach(part => {
+          const item = document.createElement("div");
+          item.className = "item";
+          const img = document.createElement("img");
+          img.src = part.image || "";
+          const info = document.createElement("div");
+          info.className = "item-info";
+          info.innerHTML = `<strong>${part.name}</strong><br>Part No: ${part.partNumber}<br>€${part.price}<br>Stock: ${part.stock}`;
+          item.appendChild(img);
+          item.appendChild(info);
+          container.appendChild(item);
+        });
+      }
+    }
+  }
+
+  searchBox.addEventListener("input", () => renderParts(searchBox.value.toLowerCase()));
+  renderParts();
+</script>
+
+
+    <script>
+      function filterItems() {
+        const query = document.getElementById('searchBox').value.toLowerCase();
+        const items = document.querySelectorAll('.item-box');
+        let matches = 0;
+        items.forEach(item => {
+          const text = item.innerText.toLowerCase();
+          if (text.includes(query)) {
+            item.style.display = 'block';
+            matches++;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+        const container = document.getElementById("container");
+        const noMatch = document.getElementById("noMatchMessage");
+        if (!noMatch) {
+          const message = document.createElement("p");
+          message.id = "noMatchMessage";
+          message.style = "text-align:center; color: red;";
+          message.innerText = "No parts found.";
+          container.appendChild(message);
+        }
+        document.getElementById("noMatchMessage").style.display = matches ? "none" : "block";
+      }
+    </script>
+    
 
 <script>
-const regData = JSON.parse(localStorage.getItem("regData") || "null");
-const parts = JSON.parse(localStorage.getItem("parts") || "[]");
-const container = document.getElementById("parts-container");
-const banner = document.getElementById("subBanner");
+  const regData = JSON.parse(localStorage.getItem("regData") || "null");
+  const banner = document.getElementById("regBanner");
+  if (regData) {
+    banner.textContent = `Showing items for ${regData.make} ${regData.model} (${regData.year})`;
+  } else {
+    banner.textContent = "No registration selected. Showing all items.";
+  }
 
-if (regData) {
-  banner.innerText = "Showing parts for " + regData.make + " " + regData.model + " (" + regData.year + ")";
-} else {
-  banner.innerText = "Showing all parts";
-}
+  const raw = JSON.parse(localStorage.getItem("parts") || "[]");
+  const filtered = regData
+    ? raw.filter(p => p.make === regData.make && p.model === regData.model && p.year === regData.year)
+    : raw;
 
-function displayParts(filter = "") {
-  container.innerHTML = "";
-  parts.forEach(part => {
-    const matchReg = !regData || (
-      part.make.toLowerCase() === regData.make.toLowerCase() &&
-      part.model.toLowerCase() === regData.model.toLowerCase() &&
-      part.year === regData.year
-    );
-    const matchSearch = !filter || Object.values(part).some(v => 
-      String(v).toLowerCase().includes(filter.toLowerCase())
-    );
-    if (matchReg && matchSearch) {
-      const div = document.createElement("div");
-      div.className = "item-box";
-      if (part.image) {
-        div.innerHTML += '<img src="' + part.image + '" alt="Part Image">';
+  const container = document.getElementById("container");
+  if (filtered.length === 0) {
+    container.innerHTML = "<p style='text-align:center;'>No items found for selected vehicle.</p>";
+  } else {
+    filtered.forEach(p => {
+      const box = document.createElement("div");
+      box.className = "item-box";
+      box.innerHTML = `
+        <img src="${p.image || ''}" alt="Image" class="part-img" />
+        <div><strong>${p.name}</strong></div>
+        <div>Part No: ${p.partNumber}</div>
+        <div>€${p.price}</div>
+        <div>Stock: ${p.stock}</div>
+      `;
+      container.appendChild(box);
+    });
+  }
+</script>
+
+
+    <script>
+      const regData = JSON.parse(localStorage.getItem("regData") || "null");
+      if (regData) {
+        const banner = document.getElementById("subBanner");
+        if (banner) {
+          banner.textContent = `Showing parts for ${regData.make} ${regData.model} (${regData.year})`;
+        }
       }
-      div.innerHTML += "<strong>" + part.name + "</strong><br>Part No: " + part.number + "<br>€" + part.price + "<br>Stock: " + part.stock;
-      container.appendChild(div);
+
+      window.onload = () => {
+        const items = document.querySelectorAll('.item-box');
+        if (regData) {
+          items.forEach(item => {
+            const make = item.getAttribute('data-make');
+            const model = item.getAttribute('data-model');
+            const year = item.getAttribute('data-year');
+            const visible = make === regData.make && model === regData.model && year === regData.year.toString();
+            item.style.display = visible ? 'block' : 'none';
+          });
+        }
+      };
+    </script>
+    
+
+    <script>
+      const regData = JSON.parse(localStorage.getItem("regData") || "null");
+      if (regData) {
+        const banner = document.getElementById("subBanner");
+        if (banner) {
+          banner.textContent = `Showing parts for ${regData.make} ${regData.model} (${regData.year})`;
+        }
+      }
+
+      window.onload = () => {
+        const items = document.querySelectorAll('.item-box');
+        if (regData) {
+          items.forEach(item => {
+            const make = item.getAttribute('data-make');
+            const model = item.getAttribute('data-model');
+            const year = item.getAttribute('data-year');
+            const visible = make === regData.make && model === regData.model && year === regData.year.toString();
+            item.style.display = visible ? 'block' : 'none';
+          });
+        }
+      };
+    </script>
+    
+
+    <script>
+      const regData = JSON.parse(localStorage.getItem("regData") || "null");
+      if (regData) {
+        const banner = document.getElementById("subBanner");
+        if (banner) {
+          banner.textContent = `Showing parts for ${regData.make} ${regData.model} (${regData.year})`;
+        }
+      }
+
+      window.onload = () => {
+        const items = document.querySelectorAll('.item-box');
+        if (regData) {
+          items.forEach(item => {
+            const make = item.getAttribute('data-make');
+            const model = item.getAttribute('data-model');
+            const year = item.getAttribute('data-year');
+            const visible = make === regData.make && model === regData.model && year === regData.year.toString();
+            item.style.display = visible ? 'block' : 'none';
+          });
+        }
+      };
+    </script>
+    
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const regData = JSON.parse(localStorage.getItem("regData") || "null");
+    const banner = document.getElementById("subBanner");
+
+    if (regData && banner) {
+      banner.textContent = `Showing ${document.title.toLowerCase()} for ${regData.make} ${regData.model} (${regData.year})`;
     }
+
+    const applyFilter = () => {
+      const items = document.querySelectorAll('.item-box');
+      if (regData) {
+        items.forEach(item => {
+          const make = item.dataset.make;
+          const model = item.dataset.model;
+          const year = item.dataset.year;
+          const visible = make === regData.make && model === regData.model && year === regData.year.toString();
+          item.style.display = visible ? "block" : "none";
+        });
+      }
+    };
+
+    // Try to apply filter repeatedly in case items are loaded dynamically
+    let attempts = 0;
+    const maxAttempts = 20;
+    const interval = setInterval(() => {
+      if (document.querySelector('.item-box') || attempts >= maxAttempts) {
+        clearInterval(interval);
+        applyFilter();
+      }
+      attempts++;
+    }, 200);
   });
-}
-
-document.getElementById("searchBar").addEventListener("input", e => {
-  displayParts(e.target.value);
-});
-
-displayParts();
 </script>
 
 </body>
