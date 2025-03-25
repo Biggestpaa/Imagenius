@@ -50,7 +50,7 @@
   <input id="year" placeholder="Year" />
   <input id="price" placeholder="Price" />
   <input id="stock" placeholder="Stock" />
-  <input id="image" placeholder="Image URL (optional)" />
+  <input type="file" id="imageFile" accept="image/*" />
   <button onclick="saveItem()">Save Item</button>
 </div>
 
@@ -60,30 +60,35 @@
 </div>
 
 <script>
-function getStorage(key) {
-  return JSON.parse(localStorage.getItem(key) || "[]");
-}
-function setStorage(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
-}
 function saveItem() {
-  const item = {
-    name: name.value,
-    number: number.value,
-    make: make.value,
-    model: model.value,
-    year: year.value,
-    price: price.value,
-    stock: stock.value,
-    image: image.value
+  const reader = new FileReader();
+  const fileInput = document.getElementById("imageFile");
+  reader.onload = function () {
+    const item = {
+      name: name.value,
+      number: number.value,
+      make: make.value,
+      model: model.value,
+      year: year.value,
+      price: price.value,
+      stock: stock.value,
+      image: reader.result
+    };
+    const key = type.value.toLowerCase() === "accessories" ? "accessories" : "parts";
+    const data = getStorage(key);
+    data.push(item);
+    setStorage(key, data);
+    alert("Item saved to " + key);
+    displayItems();
   };
-  const key = type.value.toLowerCase() === "accessories" ? "accessories" : "parts";
-  const data = getStorage(key);
-  data.push(item);
-  setStorage(key, data);
-  alert("Item saved to " + key);
-  displayItems();
+  if (fileInput.files[0]) {
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    alert("Please select an image file.");
+  }
 }
+
+
 function deleteItem(key, index) {
   const data = getStorage(key);
   data.splice(index, 1);
