@@ -297,5 +297,30 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const items = JSON.parse(localStorage.getItem("accessories") || "[]");
+  const container = document.getElementById("accessories-container");
+  if (!container) return;
+
+  items.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item-box";
+    div.setAttribute("data-make", item.make);
+    div.setAttribute("data-model", item.model);
+    div.setAttribute("data-year", item.year);
+    div.innerHTML = `
+      <h3>${item.name}</h3>
+      <p>Part No: ${item.number}</p>
+      <p>€${item.price}</p>
+      <p>Stock: ${item.stock}</p>
+      ${item.image ? `<img src="${item.image}" style="max-width:80px;">` : ""}
+    `;
+    container.appendChild(div);
+  });
+});
+</script>
+
 </body>
 </html>
