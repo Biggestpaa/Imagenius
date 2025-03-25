@@ -1,0 +1,12 @@
+body { margin: 0; font-family: Arial; background: #f0f0f0; padding: 10px; }
+.sub-banner {
+      background: #111;
+      color: white;
+      padding: 15px 10px;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      border-top: 2px solid red;
+      border-bottom: 2px solid red;
+      margin-bottom: 10px;
+    }
