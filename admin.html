@@ -1,62 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
-  }
-  h1, h2, h3 {
-    color: #d50000;
-    text-align: center;
-  }
-  input, button {
-    padding: 10px;
-    margin: 5px;
-    font-size: 16px;
-  }
-  .item-box {
-    background: white;
-    border-radius: 8px;
-    margin: 10px auto;
-    padding: 10px;
-    max-width: 90%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-</style>
-
   <title>Admin Panel</title>
-</head>
-<body style="font-family: Arial; text-align:center;">
-  <h1>Admin Panel</h1>
-  <h3>Add New Part</h3>
-  <input id="name" placeholder="Part Name"><br>
-  <input id="number" placeholder="Part Number"><br>
-  <input id="make" placeholder="Make"><br>
-  <input id="model" placeholder="Model"><br>
-  <input id="year" placeholder="Year"><br>
-  <input id="price" placeholder="Price"><br>
-  <input id="stock" placeholder="Stock"><br>
-  <button onclick="savePart()">Save Part</button>
-
-  <script>
-    function savePart() {
-      const part = {
-        name: name.value,
-        number: number.value,
-        make: make.value,
-        model: model.value,
-        year: year.value,
-        price: price.value,
-        stock: stock.value
-      };
-      const parts = JSON.parse(localStorage.getItem("parts") || "[]");
-      parts.push(part);
-      localStorage.setItem("parts", JSON.stringify(parts));
-      alert("Part saved!");
+  <style>
+    .admin-section {
+      background: white;
+      padding: 15px;
+      margin: 15px auto;
+      max-width: 600px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      border-radius: 8px;
     }
-  </script>
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      font-size: 14px;
+      width: 90%;
+    }
+    .item-box {
+      background: #f7f7f7;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 5px;
+      text-align: left;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div style="background-color: black; padding: 10px; text-align: center;">
+  <a href="index.html" style="color: white; margin: 0 20px; text-decoration: none; font-size: 18px;">Home</a>
+  <a href="parts.html" style="color: white; margin: 0 20px; text-decoration: none; font-size: 18px;">Parts</a>
+  <a href="accessories.html" style="color: white; margin: 0 20px; text-decoration: none; font-size: 18px;">Accessories</a>
+</div>
+
+<h1>Admin Panel</h1>
+
+<div class="admin-section">
+  <h3>Add New Part</h3>
+  <input id="type" placeholder="Type: parts or accessories" />
+  <input id="name" placeholder="Part Name" />
+  <input id="number" placeholder="Part Number" />
+  <input id="make" placeholder="Make" />
+  <input id="model" placeholder="Model" />
+  <input id="year" placeholder="Year" />
+  <input id="price" placeholder="Price" />
+  <input id="stock" placeholder="Stock" />
+  <input id="image" placeholder="Image URL (optional)" />
+  <button onclick="saveItem()">Save Item</button>
+</div>
+
+<div class="admin-section">
+  <h3>Manage Existing Inventory</h3>
+  <div id="inventory-list"></div>
+</div>
+
+<script>
+function getStorage(key) {
+  return JSON.parse(localStorage.getItem(key) || "[]");
+}
+function setStorage(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+function saveItem() {
+  const item = {
+    name: name.value,
+    number: number.value,
+    make: make.value,
+    model: model.value,
+    year: year.value,
+    price: price.value,
+    stock: stock.value,
+    image: image.value
+  };
+  const key = type.value.toLowerCase() === "accessories" ? "accessories" : "parts";
+  const data = getStorage(key);
+  data.push(item);
+  setStorage(key, data);
+  alert("Item saved to " + key);
+  displayItems();
+}
+function deleteItem(key, index) {
+  const data = getStorage(key);
+  data.splice(index, 1);
+  setStorage(key, data);
+  displayItems();
+}
+function displayItems() {
+  const parts = getStorage("parts");
+  const accessories = getStorage("accessories");
+  const list = document.getElementById("inventory-list");
+  list.innerHTML = "";
+  [["Parts", parts], ["Accessories", accessories]].forEach(([title, data]) => {
+    list.innerHTML += `<h4>${title}</h4>`;
+    data.forEach((item, index) => {
+      list.innerHTML += `
+        <div class="item-box">
+          <strong>${item.name}</strong> (${item.make} ${item.model} ${item.year})<br>
+          Part No: ${item.number}, €${item.price}, Stock: ${item.stock}<br>
+          <button onclick="deleteItem('${title.toLowerCase()}', ${index})">Delete</button>
+        </div>
+      `;
+    });
+  });
+}
+document.addEventListener("DOMContentLoaded", displayItems);
+</script>
 </body>
 </html>
