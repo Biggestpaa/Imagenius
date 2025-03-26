@@ -1,156 +1,200 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 0;
-    }
-    .navbar {
-      background-color: black;
-      padding: 10px;
-      text-align: center;
-    }
-    .navbar a {
-      color: white;
-      margin: 0 20px;
-      text-decoration: none;
-      font-size: 18px;
-    }
-    .admin-box {
-      background: white;
-      padding: 15px;
-      margin: 15px auto;
-      max-width: 600px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-      border-radius: 8px;
-    }
-    input, button {
-      padding: 8px;
-      margin: 5px 0;
-      width: 100%;
-      font-size: 14px;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 10px;
-    }
-    img {
-      max-width: 100px;
-      margin-top: 10px;
-    }
+    body { font-family: Arial; margin: 0; padding: 20px; background: #f4f4f4; }
+    h1 { text-align: center; }
+    .section { background: white; border-radius: 6px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    input, select, button { display: block; margin: 10px 0; padding: 10px; width: 100%; max-width: 500px; }
+    .delete-button { background: red; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; float: right; }
+    .stock-item { background: #f9f9f9; margin: 5px 0; padding: 10px; border-radius: 4px; }
+    .toggle-btn { background: #333; color: white; padding: 10px; cursor: pointer; border-radius: 6px; margin-bottom: 10px; max-width: 500px; }
   </style>
 </head>
 <body>
-<div class="navbar">
-  <a href="index.html">Home</a>
-  <a href="parts.html">Parts</a>
-  <a href="accessories.html">Accessories</a>
-</div>
+  <h1>Admin Panel</h1>
 
-<h2 style="text-align:center;">Admin Panel</h2>
+  <div class="section">
+    <h2>Update Banner</h2>
+    <input type="file" id="bannerInput" accept="image/*">
+    <button onclick="updateBanner()">Update Banner</button>
+  </div>
 
-<div class="admin-box">
-  <label>Upload Logo</label>
-  <input type="file" id="logoInput">
-  <button onclick="saveImage('logo', 'logoInput')">Save Logo</button>
-  <img id="logoPreview" />
+  <div class="section">
+    <h2>Update Logo</h2>
+    <input type="file" id="logoInput" accept="image/*">
+    <button onclick="updateLogo()">Update Logo</button>
+  </div>
 
-  <label>Upload Banner</label>
-  <input type="file" id="bannerInput">
-  <button onclick="saveImage('banner', 'bannerInput')">Save Banner</button>
-  <img id="bannerPreview" />
-</div>
+  <div class="section">
+    <h2>Add New Part</h2>
+    <input id="partName" placeholder="Part Name">
+    <input id="partNumber" placeholder="Part Number">
+    <input id="partMake" placeholder="Make">
+    <input id="partModel" placeholder="Model">
+    <input id="partYear" placeholder="Year">
+    <input id="partCategory" placeholder="Category">
+    <input id="partSubcategory" placeholder="Subcategory">
+    <input id="partPrice" type="number" placeholder="Price">
+    <input id="partStock" type="number" placeholder="Stock">
+    <input id="partImage" type="file" accept="image/*">
+    <button onclick="savePart()">Save Part</button>
+  </div>
 
-<div class="admin-box">
-  <label>Add Part or Accessory</label>
-  <input id="type" placeholder="Type: parts or accessories" />
-  <input id="name" placeholder="Name" />
-  <input id="number" placeholder="Part Number" />
-  <input id="make" placeholder="Make" />
-  <input id="model" placeholder="Model" />
-  <input id="year" placeholder="Year" />
-  <input id="price" placeholder="Price" />
-  <input id="stock" placeholder="Stock" />
-  <input type="file" id="imageFile" />
-  <button onclick="saveItem()">Save Item</button>
-</div>
+  <div class="section">
+    <h2>Add New Accessory</h2>
+    <input id="accName" placeholder="Accessory Name">
+    <input id="accNumber" placeholder="Part Number">
+    <input id="accMake" placeholder="Make">
+    <input id="accModel" placeholder="Model">
+    <input id="accYear" placeholder="Year">
+    <input id="accCategory" placeholder="Category">
+    <input id="accSubcategory" placeholder="Subcategory">
+    <input id="accPrice" type="number" placeholder="Price">
+    <input id="accStock" type="number" placeholder="Stock">
+    <input id="accImage" type="file" accept="image/*">
+    <button onclick="saveAccessory()">Save Accessory</button>
+  </div>
 
-<div class="admin-box">
-  <label>Current Inventory</label>
-  <div id="inventoryList"></div>
-</div>
+  <div class="section">
+    <div class="toggle-btn" onclick="toggleSection('partsList')">Toggle Parts List</div>
+    <div id="partsList" style="display:none;"></div>
+  </div>
 
-<script>
-function getStorage(key) {
-  return JSON.parse(localStorage.getItem(key) || "[]");
-}
-function setStorage(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
-}
-function saveImage(key, inputId) {
-  const fileInput = document.getElementById(inputId);
-  const reader = new FileReader();
-  reader.onload = function () {
-    localStorage.setItem(key, reader.result);
-    alert(key + " saved.");
-    showImages();
-  };
-  if (fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
-}
-function showImages() {
-  const logo = localStorage.getItem("logo");
-  const banner = localStorage.getItem("banner");
-  if (logo) document.getElementById("logoPreview").src = logo;
-  if (banner) document.getElementById("bannerPreview").src = banner;
-}
-function saveItem() {
-  const reader = new FileReader();
-  const file = document.getElementById("imageFile").files[0];
-  reader.onload = function () {
-    const item = {
-      name: name.value,
-      number: number.value,
-      make: make.value,
-      model: model.value,
-      year: year.value,
-      price: price.value,
-      stock: stock.value,
-      image: reader.result
+  <div class="section">
+    <div class="toggle-btn" onclick="toggleSection('accessoriesList')">Toggle Accessories List</div>
+    <div id="accessoriesList" style="display:none;"></div>
+  </div>
+
+  <script>
+    function savePart() {
+      const name = document.getElementById("partName").value;
+      const partNumber = document.getElementById("partNumber").value;
+      const make = document.getElementById("partMake").value;
+      const model = document.getElementById("partModel").value;
+      const year = document.getElementById("partYear").value;
+      const category = document.getElementById("partCategory").value;
+      const subcategory = document.getElementById("partSubcategory").value;
+      const price = document.getElementById("partPrice").value;
+      const stock = document.getElementById("partStock").value;
+      const imageInput = document.getElementById("partImage");
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const image = e.target.result;
+        const parts = JSON.parse(localStorage.getItem("parts") || "[]");
+        parts.push({ name, partNumber, make, model, year, category, subcategory, price, stock, image });
+        localStorage.setItem("parts", JSON.stringify(parts));
+        alert("Part saved!");
+        renderList("parts", "partsList");
+      };
+
+      if (imageInput.files.length > 0) {
+        reader.readAsDataURL(imageInput.files[0]);
+      } else {
+        const parts = JSON.parse(localStorage.getItem("parts") || "[]");
+        parts.push({ name, partNumber, make, model, year, category, subcategory, price, stock, image: "" });
+        localStorage.setItem("parts", JSON.stringify(parts));
+        alert("Part saved!");
+        renderList("parts", "partsList");
+      }
+    }
+
+    function saveAccessory() {
+      const name = document.getElementById("accName").value;
+      const partNumber = document.getElementById("accNumber").value;
+      const make = document.getElementById("accMake").value;
+      const model = document.getElementById("accModel").value;
+      const year = document.getElementById("accYear").value;
+      const category = document.getElementById("accCategory").value;
+      const subcategory = document.getElementById("accSubcategory").value;
+      const price = document.getElementById("accPrice").value;
+      const stock = document.getElementById("accStock").value;
+      const imageInput = document.getElementById("accImage");
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const image = e.target.result;
+        const accessories = JSON.parse(localStorage.getItem("accessories") || "[]");
+        accessories.push({ name, partNumber, make, model, year, category, subcategory, price, stock, image });
+        localStorage.setItem("accessories", JSON.stringify(accessories));
+        alert("Accessory saved!");
+        renderList("accessories", "accessoriesList");
+      };
+
+      if (imageInput.files.length > 0) {
+        reader.readAsDataURL(imageInput.files[0]);
+      } else {
+        const accessories = JSON.parse(localStorage.getItem("accessories") || "[]");
+        accessories.push({ name, partNumber, make, model, year, category, subcategory, price, stock, image: "" });
+        localStorage.setItem("accessories", JSON.stringify(accessories));
+        alert("Accessory saved!");
+        renderList("accessories", "accessoriesList");
+      }
+    }
+
+    function updateBanner() {
+      const input = document.getElementById("bannerInput");
+      if (input.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          localStorage.setItem("bannerImage", e.target.result);
+          alert("Banner updated!");
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function updateLogo() {
+      const input = document.getElementById("logoInput");
+      if (input.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          localStorage.setItem("logoImage", e.target.result);
+          alert("Logo updated!");
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function toggleSection(id) {
+      const section = document.getElementById(id);
+      section.style.display = section.style.display === "none" ? "block" : "none";
+    }
+
+    function renderList(storageKey, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+      const items = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      if (items.length === 0) {
+        container.innerHTML = "<p>No items found.</p>";
+        return;
+      }
+      items.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "stock-item";
+        div.innerHTML = `<strong>${item.name}</strong><br>Part No: ${item.partNumber || "N/A"}<button class="delete-button" onclick="deleteItem('${storageKey}', ${index})">Delete</button>`;
+        container.appendChild(div);
+      });
+    }
+
+    function deleteItem(key, index) {
+      const items = JSON.parse(localStorage.getItem(key) || "[]");
+      if (index >= 0 && index < items.length) {
+        items.splice(index, 1);
+        localStorage.setItem(key, JSON.stringify(items));
+        renderList(key, key === 'parts' ? 'partsList' : 'accessoriesList');
+        alert("Item deleted.");
+      }
+    }
+
+    window.onload = function() {
+      renderList("parts", "partsList");
+      renderList("accessories", "accessoriesList");
     };
-    const key = type.value === "accessories" ? "accessories" : "parts";
-    const items = getStorage(key);
-    items.push(item);
-    setStorage(key, items);
-    alert("Item added.");
-    displayItems();
-  };
-  if (file) reader.readAsDataURL(file);
-}
-function deleteItem(key, index) {
-  const items = getStorage(key);
-  items.splice(index, 1);
-  setStorage(key, items);
-  displayItems();
-}
-function displayItems() {
-  const parts = getStorage("parts");
-  const accessories = getStorage("accessories");
-  let html = "";
-  html += "<h4>Parts</h4>";
-  parts.forEach((p, i) => html += `<div>${p.name} <button onclick="deleteItem('parts', ${i})">Delete</button></div>`);
-  html += "<h4>Accessories</h4>";
-  accessories.forEach((p, i) => html += `<div>${p.name} <button onclick="deleteItem('accessories', ${i})">Delete</button></div>`);
-  document.getElementById("inventoryList").innerHTML = html;
-}
-document.addEventListener("DOMContentLoaded", () => {{
-  showImages();
-  displayItems();
-}});
-</script>
+  </script>
 </body>
 </html>

@@ -1,93 +1,68 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Home</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
-      text-align: center;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Home - Toyota Liffey Valley</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    function checkReg() {
+      const reg = document.getElementById("regInput").value.trim().toUpperCase();
+      const regMap = {
+        "151D12345": { make: "Toyota", model: "Yaris", year: 2015 },
+        "191D54321": { make: "Toyota", model: "Corolla", year: 2019 },
+        "202D99999": { make: "Toyota", model: "RAV4", year: 2020 }
+      };
+
+      if (reg === "152D12345") {
+        window.location.href = "admin.html";
+      } else if (regMap[reg]) {
+        localStorage.setItem("regData", JSON.stringify(regMap[reg]));
+        window.location.href = "parts.html";
+      } else {
+        alert("Registration not recognized.");
+      }
     }
-    .navbar {
-      background-color: black;
-      padding: 10px;
-    }
-    .navbar a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-size: 18px;
-    }
-    .banner img {
-      width: 100%;
-      height: auto;
-      max-height: 300px;
-      object-fit: cover;
-    }
-    .logo img {
-      max-width: 100px;
-      margin: 10px auto;
-    }
-    input, button {
-      margin: 10px;
-      padding: 10px;
-      font-size: 16px;
-      width: 80%;
-      max-width: 300px;
-    }
-  </style>
+
+    window.onload = () => {
+      const banner = localStorage.getItem('bannerImage');
+      if (banner) document.getElementById('banner').src = banner;
+      const logo = localStorage.getItem('logoImage');
+      if (logo) document.getElementById('logo').src = logo;
+    };
+  </script>
 </head>
 <body>
-  <div class="navbar">
-    <a href="index.html">Home</a>
-    <a href="parts.html">Parts</a>
-    <a href="accessories.html">Accessories</a>
+  <nav style="background:black;padding:10px;text-align:center;">
+    <a href="index.html" style="color:white;margin:0 20px;font-size:18px;text-decoration:none;">Home</a>
+    <a href="parts.html" style="color:white;margin:0 20px;font-size:18px;text-decoration:none;">Parts</a>
+    <a href="accessories.html" style="color:white;margin:0 20px;font-size:18px;text-decoration:none;">Accessories</a>
+  </nav>
+
+  <img id="banner" style="width:100%;max-height:300px;object-fit:cover;" />
+  <h1 style="text-align:center;">Welcome to Toyota Liffey Valley</h1>
+
+  <div style="text-align:center;margin-top:20px;">
+    <input type="text" id="regInput" placeholder="Enter Reg Number"
+           style="padding:10px;width:250px;border-radius:6px;border:1px solid #ccc;">
+    <button onclick="checkReg()" style="padding:10px 20px;background:black;color:white;border:none;border-radius:6px;cursor:pointer;">Continue</button>
   </div>
-  <div class="logo"><img id="logoImg" src="" alt="Logo" /></div>
-  <div class="banner"><img id="bannerImg" src="" alt="Banner" /></div>
-  <h2>Welcome to Toyota Liffey Valley Parts Store</h2>
-  <input type="text" id="regInput" placeholder="Enter Registration">
-  <br>
-  <button onclick="submitReg()">Continue</button>
-  <button onclick="resetReg()">Reset</button>
 
+  <div style="text-align:center;margin-top:20px;">
+    <img id="logo" style="width:100px" />
+  </div>
+
+<div style="text-align:center; margin-top: 10px;">
+  <button onclick="resetReg()" style="padding: 6px 12px;">Reset Registration</button>
+</div>
 <script>
-const regData = {{
-  "151D12345": {{ make: "Toyota", model: "Yaris", year: "2015" }},
-  "161D67890": {{ make: "Toyota", model: "Corolla", year: "2019" }},
-  "152D12345": "admin"
-}};
-
-function submitReg() {{
-  const reg = document.getElementById("regInput").value.trim().toUpperCase();
-  if (reg === "152D12345") {{
-    window.location.href = "admin.html";
-    return;
-  }}
-  const data = regData[reg];
-  if (!data) {{
-    alert("Registration not recognized.");
-    return;
-  }}
-  localStorage.setItem("regData", JSON.stringify(data));
-  window.location.href = "parts.html";
-}}
-
-function resetReg() {{
-  localStorage.removeItem("regData");
-  alert("Registration reset.");
-}}
-
-function loadImages() {{
-  const banner = localStorage.getItem("banner");
-  const logo = localStorage.getItem("logo");
-  if (banner) document.getElementById("bannerImg").src = banner;
-  if (logo) document.getElementById("logoImg").src = logo;
-}}
-
-loadImages();
+  function resetReg() {
+    localStorage.removeItem("regData");
+    alert("Registration has been reset.");
+    window.location.href = "index.html";
+  }
 </script>
+
 </body>
 </html>
